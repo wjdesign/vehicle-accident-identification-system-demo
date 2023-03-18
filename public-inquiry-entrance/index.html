@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" >
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+    <title>臺中市車輛行車事故鑑定及覆議作業系統</title>
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index.js"></script>
+    <link rel="stylesheet" href="./assets/index.css">
+  </head>
+  <body class="d-flex w-100 h-100 bodyWrapper">
+    
+    <template id="background-polygons-floating">
+      <div class="position-absolute pe-none inset-0" style="z-index: -1">
+        <div           class="bg-polygon-lt"
+          v-scope="PolygonBase({
+            width: '47rem',
+            height: '50rem',
+            fill: 'fence',
+            shape: 'pentagon',
+            rotate: '30deg',
+            opacity: '1',
+            color: 'transparent'
+          })"
+        ></div>
+
+        <div           class="bg-polygon-rb"
+          v-scope="PolygonBase({
+            width: '40rem',
+            height: '40rem',
+            fill: 'spot',
+            shape: 'round',
+            rotate: '15deg',
+            opacity: '1',
+            color: 'transparent'
+          })"
+        ></div>
+      </div>
+    </template>
+
+    <div       v-scope="App"
+      v-cloak
+      class="position-relative mainWrapper"
+      @vue:mounted="onMounted($el)"
+      @vue:unmounted="onUnMounted($el)"
+    >
+      <div         v-scope="BackgroundPolygonsFloating()"
+        class="position-absolute inset-0 overflow-hidden"
+        style="z-index: -1"
+      ></div>
+      <div class="container">
+        <h1 class="text-center mainTitle" data-storke="臺中市車輛行車事故鑑定">臺中市車輛行車事故鑑定</h1>
+        <h1 class="text-center mainTitle" data-storke="及覆議作業系統">及覆議作業系統</h1>
+        <div class="mainFormWrapper">
+          <div class="marqueeWrapper">
+            <h1>臺中市車輛行車事故鑑定及覆議業務「民眾申請案件進度線上查詢服務」開放囉!</h1>
+          </div>
+          <h2 class="subTitleWrapper">
+            車輛行車事故鑑定系統
+            <strong>民眾查詢</strong>
+          </h2>
+          <h4 class="formTitle">
+            <i class="prependIcon"></i>
+            查詢資料
+          </h4>
+          <div class="container">
+            <form class="row g-3" @submit.prevent="onSubmit">
+              <div class="card">
+                <div class="card-body">
+                  <div class="input-group mb-3">
+                    <div class="input-group-text col-5 col-sm-4 col-md-3">
+                      <select class="form-select" v-model="formData1.type" @change="changeFormData(formData1.type)">
+                        <option :value="COLUMN_TYPE.INVOLVED">當事人姓名</option>
+                        <option :value="COLUMN_TYPE.APPLICANT">申請人</option>
+                        <option :value="COLUMN_TYPE.CAR_NUMBER">車號</option>
+                      </select>
+                    </div>
+                    <input                       type="text"
+                      class="form-control"
+                      v-model="formData1.input"
+                      :placeholder="genPlaceholder(formData1.type)"
+                    >
+                  </div>
+                  <div class="input-group">
+                    <div class="input-group-text col-5 col-sm-4 col-md-3">
+                      <select class="form-select" v-model="formData2.type" @change="changeFormData(formData2.type)">
+                        <option :value="COLUMN_TYPE.DATE">肇事日期</option>
+                        <option :value="COLUMN_TYPE.CASE_NUMBER">案號</option>
+                      </select>
+                    </div>
+                    <input                       :type="formData2.type === COLUMN_TYPE.DATE ? 'date' : 'text'"
+                      class="form-control"
+                      v-model="formData2.input"
+                      :placeholder="genPlaceholder(formData2.type)"
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <button type="submit" class="btn position-relative btnSearch">
+                  <i class="btnFloatIcon btnIconDot"></i>
+                  查詢
+                  <i class="btnIcon btnIconSearch"></i>
+                </button>
+                <button type="reset" class="btn position-relative btnClear">
+                  <i class="btnFloatIcon btnIconDashed"></i>
+                  清除
+                  <i class="btnIcon btnIconClear"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="mainFormWrapper instructionWrapper">
+          <h4 class="formTitle">
+            <i class="prependIcon"></i>
+            說明
+            <div class="spacer" ></div>
+            <div class="text-center viewCountWrapper">
+              <p class="viewCount">
+                瀏覽人次：
+                <span class="count">224,871</span>
+                人
+              </p>
+            </div>
+          </h4>
+          <div class="container">
+            <div class="row my-2">
+              <div class="col-12">
+                <p class="mb-0 text-danger">
+                  欲查詢時，得輸入「當事人姓名」或 「申請人姓名」或 「車號」三者之一，以及 「肇事日期」或
+                  「案號」兩者之一。 如下列六種組合之一均可：
+                </p>
+              </div>
+            </div>
+            <div class="row instructionList">
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.INVOLVED && formData2.type === COLUMN_TYPE.DATE}"
+                @click="autoCompleteQuery(COLUMN_TYPE.INVOLVED, COLUMN_TYPE.DATE)"
+              >
+                <h6>「當事人姓名」以及 「肇事日期」</h6>
+              </div>
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.INVOLVED && formData2.type === COLUMN_TYPE.CASE_NUMBER}"
+                @click="autoCompleteQuery(COLUMN_TYPE.INVOLVED, COLUMN_TYPE.CASE_NUMBER)"
+              >
+                <h6>「當事人姓名」以及「案號」</h6>
+              </div>
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.APPLICANT && formData2.type === COLUMN_TYPE.DATE}"
+                @click="autoCompleteQuery(COLUMN_TYPE.APPLICANT, COLUMN_TYPE.DATE)"
+              >
+                <h6>「申請人姓名」以及 「肇事日期」</h6>
+              </div>
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.APPLICANT && formData2.type === COLUMN_TYPE.CASE_NUMBER}"
+                @click="autoCompleteQuery(COLUMN_TYPE.APPLICANT, COLUMN_TYPE.CASE_NUMBER)"
+              >
+                <h6>「申請人姓名」以及「案號」</h6>
+              </div>
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.CAR_NUMBER && formData2.type === COLUMN_TYPE.DATE}"
+                @click="autoCompleteQuery(COLUMN_TYPE.CAR_NUMBER, COLUMN_TYPE.DATE)"
+              >
+                <h6>「車號」以及 「肇事日期」</h6>
+              </div>
+              <div                 class="col-12 instructionItem"
+                :class="{'isActive': formData1.type === COLUMN_TYPE.CAR_NUMBER && formData2.type === COLUMN_TYPE.CASE_NUMBER}"
+                @click="autoCompleteQuery(COLUMN_TYPE.CAR_NUMBER, COLUMN_TYPE.CASE_NUMBER)"
+              >
+                <h6>「車號」以及「案號」</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="copyrightWrapper">
+        <div class="container">
+          <div class="row">
+            <p class="col-12 mb-0 py-3 text-center">
+              Copyright © 2023 All Rights Reserved
+              <a                 class="mx-2 text-decoration-none"
+                href="https://www.traffic.taichung.gov.tw/unit/index_tao.asp"
+                target="_blank"
+                title="開新視窗: 臺中市交通事件裁決處"
+              >
+                臺中市交通事件裁決處
+              </a>
+              版權所有
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  
+</body>
+</html>
