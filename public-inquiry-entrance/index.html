@@ -98,6 +98,7 @@
                       class="form-control"
                       v-model="formData1.input"
                       :placeholder="genPlaceholder(formData1.type)"
+                      required
                     >
                   </div>
                   <div class="input-group">
@@ -111,6 +112,7 @@
                       class="form-control"
                       v-model="formData2.input"
                       :placeholder="genPlaceholder(formData2.type)"
+                      required
                     >
                   </div>
                 </div>
@@ -121,7 +123,7 @@
                   查詢
                   <i class="btnIcon btnIconSearch"></i>
                 </button>
-                <button type="reset" class="btn position-relative btnClear">
+                <button type="reset" class="btn position-relative btnClear" @click="onReset">
                   <i class="btnFloatIcon btnIconDashed"></i>
                   清除
                   <i class="btnIcon btnIconClear"></i>
